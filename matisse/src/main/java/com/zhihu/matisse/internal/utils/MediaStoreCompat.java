@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+
 import androidx.fragment.app.Fragment;
 import androidx.core.content.FileProvider;
 import androidx.core.os.EnvironmentCompat;
@@ -42,9 +43,9 @@ public class MediaStoreCompat {
 
     private final WeakReference<Activity> mContext;
     private final WeakReference<Fragment> mFragment;
-    private       CaptureStrategy         mCaptureStrategy;
-    private       Uri                     mCurrentPhotoUri;
-    private       String                  mCurrentPhotoPath;
+    private CaptureStrategy mCaptureStrategy;
+    private Uri mCurrentPhotoUri;
+    private String mCurrentPhotoPath;
 
     public MediaStoreCompat(Activity activity) {
         mContext = new WeakReference<>(activity);
@@ -73,7 +74,8 @@ public class MediaStoreCompat {
 
     public void dispatchCaptureIntent(Context context, int requestCode) {
         Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (captureIntent.resolveActivity(context.getPackageManager()) != null) {
+        if (captureIntent.resolveActivity(context.getPackageManager()) != null
+                || context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             File photoFile = null;
             try {
                 photoFile = createImageFile();
@@ -142,4 +144,5 @@ public class MediaStoreCompat {
     public String getCurrentPhotoPath() {
         return mCurrentPhotoPath;
     }
+
 }

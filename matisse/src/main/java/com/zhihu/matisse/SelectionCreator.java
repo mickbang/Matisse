@@ -368,4 +368,9 @@ public final class SelectionCreator {
         mSelectionSpec.showPreview = showPreview;
         return this;
     }
+
+    public SelectionCreator singleDirectApply(boolean singleDirectApply) {
+        mSelectionSpec.singleDirectApply = singleDirectApply;
+        return this;
+    }
 }

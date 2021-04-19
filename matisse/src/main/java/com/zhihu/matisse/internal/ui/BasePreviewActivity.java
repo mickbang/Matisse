@@ -19,10 +19,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
 import androidx.viewpager.widget.ViewPager;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -63,11 +65,9 @@ public abstract class BasePreviewActivity extends AppCompatActivity implements V
     protected TextView mSize;
 
     protected int mPreviousPos = -1;
-
+    protected boolean mOriginalEnable;
     private LinearLayout mOriginalLayout;
     private CheckRadioView mOriginal;
-    protected boolean mOriginalEnable;
-
     private FrameLayout mBottomToolbar;
     private FrameLayout mTopToolbar;
     private boolean mIsToolbarHide = false;
@@ -112,6 +112,10 @@ public abstract class BasePreviewActivity extends AppCompatActivity implements V
         mCheckView.setCountable(mSpec.countable);
         mBottomToolbar = findViewById(R.id.bottom_toolbar);
         mTopToolbar = findViewById(R.id.top_toolbar);
+
+        if (mSpec.singleSelectionModeEnabled() && mSpec.singleDirectApply) {
+            mCheckView.setVisibility(View.INVISIBLE);
+        }
 
         mCheckView.setOnClickListener(new View.OnClickListener() {
 
@@ -183,10 +187,72 @@ public abstract class BasePreviewActivity extends AppCompatActivity implements V
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public void onBackPressed() {
-        sendBackResult(false);
-        super.onBackPressed();
+    private boolean assertAddSelection(Item item) {
+        IncapableCause cause = mSelectedCollection.isAcceptable(item);
+        IncapableCause.handleCause(this, cause);
+        return cause == null;
+    }
+
+    private void updateApplyButton() {
+        int selectedCount = mSelectedCollection.count();
+        if (selectedCount == 0) {
+            if (mSpec.singleSelectionModeEnabled() && mSpec.singleDirectApply) {
+                mButtonApply.setText(R.string.button_apply_default);
+                mButtonApply.setEnabled(true);
+            } else {
+                mButtonApply.setText(R.string.button_apply_default);
+                mButtonApply.setEnabled(false);
+            }
+        } else if (selectedCount == 1 && mSpec.singleSelectionModeEnabled()) {
+            mButtonApply.setText(R.string.button_apply_default);
+            mButtonApply.setEnabled(true);
+        } else {
+            mButtonApply.setEnabled(true);
+            mButtonApply.setText(getString(R.string.button_apply, selectedCount));
+        }
+
+        if (mSpec.originalable) {
+            mOriginalLayout.setVisibility(View.VISIBLE);
+            updateOriginalState();
+        } else {
+            mOriginalLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private int countOverMaxSize() {
+        int count = 0;
+        int selectedCount = mSelectedCollection.count();
+        for (int i = 0; i < selectedCount; i++) {
+            Item item = mSelectedCollection.asList().get(i);
+            if (item.isImage()) {
+                float size = PhotoMetadataUtils.getSizeInMB(item.size);
+                if (size > mSpec.originalMaxSize) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    private void updateOriginalState() {
+        mOriginal.setChecked(mOriginalEnable);
+        if (!mOriginalEnable) {
+            mOriginal.setColor(Color.WHITE);
+        }
+
+        if (countOverMaxSize() > 0) {
+
+            if (mOriginalEnable) {
+                IncapableDialog incapableDialog = IncapableDialog.newInstance("",
+                        getString(R.string.error_over_original_size, mSpec.originalMaxSize));
+                incapableDialog.show(getSupportFragmentManager(),
+                        IncapableDialog.class.getName());
+
+                mOriginal.setChecked(false);
+                mOriginal.setColor(Color.WHITE);
+                mOriginalEnable = false;
+            }
+        }
     }
 
     @Override
@@ -194,9 +260,33 @@ public abstract class BasePreviewActivity extends AppCompatActivity implements V
         if (v.getId() == R.id.button_back) {
             onBackPressed();
         } else if (v.getId() == R.id.button_apply) {
+            if (mSpec.singleSelectionModeEnabled() && mSpec.singleDirectApply) {
+                Item item = mAdapter.getMediaItem(mPager.getCurrentItem());
+                if (assertAddSelection(item)) {
+                    mSelectedCollection.add(item);
+                }
+                if (mSpec.onSelectedListener != null) {
+                    mSpec.onSelectedListener.onSelected(
+                            mSelectedCollection.asListOfUri(), mSelectedCollection.asListOfString());
+                }
+            }
             sendBackResult(true);
             finish();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        sendBackResult(false);
+        super.onBackPressed();
+    }
+
+    protected void sendBackResult(boolean apply) {
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_RESULT_BUNDLE, mSelectedCollection.getDataWithBundle());
+        intent.putExtra(EXTRA_RESULT_APPLY, apply);
+        intent.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
+        setResult(Activity.RESULT_OK, intent);
     }
 
     @Override
@@ -268,65 +358,6 @@ public abstract class BasePreviewActivity extends AppCompatActivity implements V
 
     }
 
-    private void updateApplyButton() {
-        int selectedCount = mSelectedCollection.count();
-        if (selectedCount == 0) {
-            mButtonApply.setText(R.string.button_apply_default);
-            mButtonApply.setEnabled(false);
-        } else if (selectedCount == 1 && mSpec.singleSelectionModeEnabled()) {
-            mButtonApply.setText(R.string.button_apply_default);
-            mButtonApply.setEnabled(true);
-        } else {
-            mButtonApply.setEnabled(true);
-            mButtonApply.setText(getString(R.string.button_apply, selectedCount));
-        }
-
-        if (mSpec.originalable) {
-            mOriginalLayout.setVisibility(View.VISIBLE);
-            updateOriginalState();
-        } else {
-            mOriginalLayout.setVisibility(View.GONE);
-        }
-    }
-
-
-    private void updateOriginalState() {
-        mOriginal.setChecked(mOriginalEnable);
-        if (!mOriginalEnable) {
-            mOriginal.setColor(Color.WHITE);
-        }
-
-        if (countOverMaxSize() > 0) {
-
-            if (mOriginalEnable) {
-                IncapableDialog incapableDialog = IncapableDialog.newInstance("",
-                        getString(R.string.error_over_original_size, mSpec.originalMaxSize));
-                incapableDialog.show(getSupportFragmentManager(),
-                        IncapableDialog.class.getName());
-
-                mOriginal.setChecked(false);
-                mOriginal.setColor(Color.WHITE);
-                mOriginalEnable = false;
-            }
-        }
-    }
-
-
-    private int countOverMaxSize() {
-        int count = 0;
-        int selectedCount = mSelectedCollection.count();
-        for (int i = 0; i < selectedCount; i++) {
-            Item item = mSelectedCollection.asList().get(i);
-            if (item.isImage()) {
-                float size = PhotoMetadataUtils.getSizeInMB(item.size);
-                if (size > mSpec.originalMaxSize) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
     protected void updateSize(Item item) {
         if (item.isGif()) {
             mSize.setVisibility(View.VISIBLE);
@@ -340,19 +371,5 @@ public abstract class BasePreviewActivity extends AppCompatActivity implements V
         } else if (mSpec.originalable) {
             mOriginalLayout.setVisibility(View.VISIBLE);
         }
-    }
-
-    protected void sendBackResult(boolean apply) {
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_RESULT_BUNDLE, mSelectedCollection.getDataWithBundle());
-        intent.putExtra(EXTRA_RESULT_APPLY, apply);
-        intent.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
-        setResult(Activity.RESULT_OK, intent);
-    }
-
-    private boolean assertAddSelection(Item item) {
-        IncapableCause cause = mSelectedCollection.isAcceptable(item);
-        IncapableCause.handleCause(this, cause);
-        return cause == null;
     }
 }

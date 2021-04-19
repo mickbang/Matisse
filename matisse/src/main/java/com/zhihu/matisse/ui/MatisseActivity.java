@@ -69,7 +69,7 @@ public class MatisseActivity extends AppCompatActivity implements
         AlbumCollection.AlbumCallbacks, AdapterView.OnItemSelectedListener,
         MediaSelectionFragment.SelectionProvider, View.OnClickListener,
         AlbumMediaAdapter.CheckStateListener, AlbumMediaAdapter.OnMediaClickListener,
-        AlbumMediaAdapter.OnPhotoCapture {
+        AlbumMediaAdapter.OnPhotoCapture, AlbumMediaAdapter.OnAutoApply {
 
     public static final String EXTRA_RESULT_SELECTION = "extra_result_selection";
     public static final String EXTRA_RESULT_SELECTION_PATH = "extra_result_selection_path";
@@ -317,14 +317,7 @@ public class MatisseActivity extends AppCompatActivity implements
             intent.putExtra(BasePreviewActivity.EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
             startActivityForResult(intent, REQUEST_CODE_PREVIEW);
         } else if (v.getId() == R.id.button_apply) {
-            Intent result = new Intent();
-            ArrayList<Uri> selectedUris = (ArrayList<Uri>) mSelectedCollection.asListOfUri();
-            result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selectedUris);
-            ArrayList<String> selectedPaths = (ArrayList<String>) mSelectedCollection.asListOfString();
-            result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
-            result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
-            setResult(RESULT_OK, result);
-            finish();
+            apply();
         } else if (v.getId() == R.id.originalLayout) {
             int count = countOverMaxSize();
             if (count > 0) {
@@ -342,6 +335,17 @@ public class MatisseActivity extends AppCompatActivity implements
                 mSpec.onCheckedListener.onCheck(mOriginalEnable);
             }
         }
+    }
+
+    private void apply() {
+        Intent result = new Intent();
+        ArrayList<Uri> selectedUris = (ArrayList<Uri>) mSelectedCollection.asListOfUri();
+        result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selectedUris);
+        ArrayList<String> selectedPaths = (ArrayList<String>) mSelectedCollection.asListOfString();
+        result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
+        result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
+        setResult(RESULT_OK, result);
+        finish();
     }
 
     @Override
@@ -434,4 +438,8 @@ public class MatisseActivity extends AppCompatActivity implements
         }
     }
 
+    @Override
+    public void autoApply() {
+        apply();
+    }
 }

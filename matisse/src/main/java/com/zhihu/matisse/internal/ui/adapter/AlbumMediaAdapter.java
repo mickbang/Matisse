@@ -20,8 +20,10 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -125,6 +127,24 @@ public class AlbumMediaAdapter extends
         }
     }
 
+    @Override
+    public int getItemViewType(int position, Cursor cursor) {
+        return Item.valueOf(cursor).isCapture() ? VIEW_TYPE_CAPTURE : VIEW_TYPE_MEDIA;
+    }
+
+    private int getImageResize(Context context) {
+        if (mImageResize == 0) {
+            RecyclerView.LayoutManager lm = mRecyclerView.getLayoutManager();
+            int spanCount = ((GridLayoutManager) lm).getSpanCount();
+            int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+            int availableWidth = screenWidth - context.getResources().getDimensionPixelSize(
+                    R.dimen.media_grid_spacing) * (spanCount - 1);
+            mImageResize = availableWidth / spanCount;
+            mImageResize = (int) (mImageResize * mSelectionSpec.thumbnailScale);
+        }
+        return mImageResize;
+    }
+
     private void setCheckStatus(Item item, MediaGrid mediaGrid) {
         if (mSelectionSpec.countable) {
             int checkedNum = mSelectedCollection.checkedNumOf(item);
@@ -165,12 +185,22 @@ public class AlbumMediaAdapter extends
             }
         } else {
             updateSelectedItem(item, holder);
+            if (mSelectionSpec.singleSelectionModeEnabled() && mSelectionSpec.singleDirectApply) {
+                if (thumbnail.getContext() instanceof OnAutoApply) {
+                    ((OnAutoApply) thumbnail.getContext()).autoApply();
+                }
+            }
         }
     }
 
     @Override
     public void onCheckViewClicked(CheckView checkView, Item item, RecyclerView.ViewHolder holder) {
         updateSelectedItem(item, holder);
+        if (mSelectionSpec.singleSelectionModeEnabled() && mSelectionSpec.singleDirectApply) {
+            if (checkView.getContext() instanceof OnAutoApply) {
+                ((OnAutoApply) checkView.getContext()).autoApply();
+            }
+        }
     }
 
     private void updateSelectedItem(Item item, RecyclerView.ViewHolder holder) {
@@ -198,24 +228,18 @@ public class AlbumMediaAdapter extends
         }
     }
 
-    private void notifyCheckStateChanged() {
-        notifyDataSetChanged();
-        if (mCheckStateListener != null) {
-            mCheckStateListener.onUpdate();
-        }
-    }
-
-    @Override
-    public int getItemViewType(int position, Cursor cursor) {
-        return Item.valueOf(cursor).isCapture() ? VIEW_TYPE_CAPTURE : VIEW_TYPE_MEDIA;
-    }
-
     private boolean assertAddSelection(Context context, Item item) {
         IncapableCause cause = mSelectedCollection.isAcceptable(item);
         IncapableCause.handleCause(context, cause);
         return cause == null;
     }
 
+    private void notifyCheckStateChanged() {
+        notifyDataSetChanged();
+        if (mCheckStateListener != null) {
+            mCheckStateListener.onUpdate();
+        }
+    }
 
     public void registerCheckStateListener(CheckStateListener listener) {
         mCheckStateListener = listener;
@@ -251,19 +275,6 @@ public class AlbumMediaAdapter extends
         }
     }
 
-    private int getImageResize(Context context) {
-        if (mImageResize == 0) {
-            RecyclerView.LayoutManager lm = mRecyclerView.getLayoutManager();
-            int spanCount = ((GridLayoutManager) lm).getSpanCount();
-            int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
-            int availableWidth = screenWidth - context.getResources().getDimensionPixelSize(
-                    R.dimen.media_grid_spacing) * (spanCount - 1);
-            mImageResize = availableWidth / spanCount;
-            mImageResize = (int) (mImageResize * mSelectionSpec.thumbnailScale);
-        }
-        return mImageResize;
-    }
-
     public interface CheckStateListener {
         void onUpdate();
     }
@@ -274,6 +285,10 @@ public class AlbumMediaAdapter extends
 
     public interface OnPhotoCapture {
         void capture();
+    }
+
+    public interface OnAutoApply {
+        void autoApply();
     }
 
     private static class MediaViewHolder extends RecyclerView.ViewHolder {

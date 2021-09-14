@@ -37,6 +37,7 @@ import com.zhihu.matisse.ui.MatisseActivity;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Set;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
@@ -127,6 +128,11 @@ public final class SelectionCreator {
      */
     public SelectionCreator theme(@StyleRes int themeId) {
         mSelectionSpec.themeId = themeId;
+        return this;
+    }
+
+    public SelectionCreator local(Locale locale){
+        mSelectionSpec.locale = locale;
         return this;
     }
 

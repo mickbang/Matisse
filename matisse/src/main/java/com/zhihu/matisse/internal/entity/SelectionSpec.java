@@ -29,6 +29,7 @@ import com.zhihu.matisse.listener.OnCheckedListener;
 import com.zhihu.matisse.listener.OnSelectedListener;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public final class SelectionSpec {
@@ -58,7 +59,7 @@ public final class SelectionSpec {
     public OnCheckedListener onCheckedListener;
     public boolean showPreview;
     public boolean singleDirectApply;
-
+    public Locale locale;
     private SelectionSpec() {
     }
 
@@ -95,6 +96,7 @@ public final class SelectionSpec {
         originalMaxSize = Integer.MAX_VALUE;
         showPreview = true;
         singleDirectApply = false;
+        locale = Locale.getDefault();
     }
 
     public boolean singleSelectionModeEnabled() {

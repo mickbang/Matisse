@@ -21,6 +21,7 @@ import androidx.fragment.app.FragmentActivity;
 import android.widget.Toast;
 
 import com.zhihu.matisse.internal.ui.widget.IncapableDialog;
+import com.zhihu.matisse.internal.ui.widget.IncapableDialogCus;
 
 import java.lang.annotation.Retention;
 
@@ -70,7 +71,7 @@ public class IncapableCause {
                 // do nothing.
                 break;
             case DIALOG:
-                IncapableDialog incapableDialog = IncapableDialog.newInstance(cause.mTitle, cause.mMessage);
+                IncapableDialogCus incapableDialog = IncapableDialogCus.newInstance(cause.mTitle, cause.mMessage);
                 incapableDialog.show(((FragmentActivity) context).getSupportFragmentManager(),
                         IncapableDialog.class.getName());
                 break;

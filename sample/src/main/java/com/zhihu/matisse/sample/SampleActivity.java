@@ -83,7 +83,7 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
             case R.id.zhihu:
                 Matisse.from(SampleActivity.this)
                         .choose(MimeType.ofImage(), false)
-                        .countable(false)
+                        .countable(true)
                         .capture(true)
                         .singleDirectApply(true)
                         .captureStrategy(
@@ -111,7 +111,7 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
                 Matisse.from(SampleActivity.this)
                         .choose(MimeType.ofImage())
                         .theme(R.style.Matisse_Dracula)
-                        .countable(false)
+                        .countable(true)
                         .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
                         .maxSelectable(9)
                         .originalEnable(true)

@@ -82,5 +82,13 @@
     <style name="Popup.Dracula" parent="Widget.AppCompat.ListPopupWindow">
         <item name="android:popupBackground">@color/dracula_album_popup_bg</item>
     </style>
-
+    <!--对话框样式-->
+    <style name="transparentDialogStyle" parent="Theme.AppCompat.Dialog">
+        <!--背景透明-->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <!--没有标题-->
+        <item name="android:windowNoTitle">true</item>
+        <!--背景昏暗-->
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
 </resources>

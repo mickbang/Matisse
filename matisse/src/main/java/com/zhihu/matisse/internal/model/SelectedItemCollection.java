@@ -189,9 +189,9 @@ public class SelectedItemCollection {
                 );
             }
 
-            return new IncapableCause(cause);
+            return new IncapableCause(IncapableCause.DIALOG,cause);
         } else if (typeConflict(item)) {
-            return new IncapableCause(mContext.getString(R.string.error_type_conflict));
+            return new IncapableCause(IncapableCause.DIALOG,mContext.getString(R.string.error_type_conflict));
         }
 
         return PhotoMetadataUtils.isAcceptable(mContext, item);

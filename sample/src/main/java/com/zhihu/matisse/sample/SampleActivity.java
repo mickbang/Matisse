@@ -81,39 +81,24 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
     private void startAction(View v) {
         switch (v.getId()) {
             case R.id.zhihu:
-                Matisse.from(SampleActivity.this)
-                        .choose(MimeType.ofImage(), false)
-                        .countable(true)
-                        .capture(true)
-                        .singleDirectApply(true)
-                        .captureStrategy(
-                                new CaptureStrategy(true, "com.zhihu.matisse.sample.fileprovider", "test"))
-                        .maxSelectable(2)
-                        .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
-                        .gridExpectedSize(
-                                getResources().getDimensionPixelSize(R.dimen.grid_expected_size))
-                        .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-                        .thumbnailScale(0.85f)
-                        .imageEngine(new GlideEngine())
-                        .setOnSelectedListener((uriList, pathList) -> {
-                            Log.e("onSelected", "onSelected: pathList=" + pathList);
-                        })
+                Matisse.from(this)
+                        .choose(MimeType.ofImage())
                         .showSingleMediaType(true)
-                        .originalEnable(true)
-                        .maxOriginalSize(10)
-                        .autoHideToolbarOnSingleTap(true)
-                        .setOnCheckedListener(isChecked -> {
-                            Log.e("isChecked", "onCheck: isChecked=" + isChecked);
-                        })
+                        .theme(R.style.Matisse_Dracula)
+                        .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
+                        .maxSelectable(10)
+                        .originalEnable(false)
+                        .imageEngine(new PicassoEngine())
                         .forResult(REQUEST_CODE_CHOOSE);
                 break;
             case R.id.dracula:
-                Matisse.from(SampleActivity.this)
+                Matisse.from(this)
                         .choose(MimeType.ofImage())
+                        .showSingleMediaType(true)
                         .theme(R.style.Matisse_Dracula)
-                        .countable(true)
+                        .singleDirectApply(true)
                         .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
-                        .maxSelectable(9)
+                        .maxSelectable(1)
                         .originalEnable(true)
                         .maxOriginalSize(10)
                         .imageEngine(new PicassoEngine())

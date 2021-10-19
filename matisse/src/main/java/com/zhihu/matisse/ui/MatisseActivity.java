@@ -39,6 +39,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -94,6 +95,7 @@ public class MatisseActivity extends AppCompatActivity implements
     private TextView mButtonApply;
     private View mContainer;
     private View mEmptyView;
+    FrameLayout bottom_toolbar;
 
     private LinearLayout mOriginalLayout;
     private CheckRadioView mOriginal;
@@ -155,6 +157,13 @@ public class MatisseActivity extends AppCompatActivity implements
         mOriginalLayout = findViewById(R.id.originalLayout);
         mOriginal = findViewById(R.id.original);
         mOriginalLayout.setOnClickListener(this);
+
+        bottom_toolbar = findViewById(R.id.bottom_toolbar);
+        if (mSpec.singleDirectApply) {
+            bottom_toolbar.setVisibility(View.GONE);
+        }else {
+            bottom_toolbar.setVisibility(View.VISIBLE);
+        }
 
         mSelectedCollection.onCreate(savedInstanceState);
         if (savedInstanceState != null) {

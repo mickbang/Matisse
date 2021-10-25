@@ -49,6 +49,9 @@ public class LanguageUtils {
 
     @TargetApi(Build.VERSION_CODES.N)
     private static Context updateResources(Context context, Locale locale) {
+        if (locale == null) {
+            return context;
+        }
         try {
             new WebView(context).destroy();
         } catch (Exception e) {

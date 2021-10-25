@@ -101,11 +101,14 @@ public class MatisseActivity extends AppCompatActivity implements
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(
-                LanguageUtils.attachBaseContext(
-                        newBase, SelectionSpec.getInstance().locale)
-        );
-
+        if (SelectionSpec.getInstance().locale != null) {
+            super.attachBaseContext(
+                    LanguageUtils.attachBaseContext(
+                            newBase, SelectionSpec.getInstance().locale)
+            );
+        }else {
+            super.attachBaseContext(newBase);
+        }
     }
 
     @Override

@@ -15,9 +15,7 @@
  */
 package com.zhihu.matisse.ui;
 
-import android.accounts.AccountManager;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -63,10 +61,8 @@ import com.zhihu.matisse.internal.utils.PathUtils;
 import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
 
 import com.zhihu.matisse.internal.utils.SingleMediaScanner;
-import com.zhihu.matisse.utils.LanguageUtils;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 /**
  * Main Activity to display albums and media content (images/videos) in each album
@@ -100,20 +96,6 @@ public class MatisseActivity extends AppCompatActivity implements
     private LinearLayout mOriginalLayout;
     private CheckRadioView mOriginal;
     private boolean mOriginalEnable;
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        if (SelectionSpec.getInstance().locale != null) {
-            super.attachBaseContext(
-                    LanguageUtils.attachBaseContext(
-                            newBase, SelectionSpec.getInstance().locale)
-            );
-        }else {
-            super.attachBaseContext(
-                    newBase
-            );
-        }
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

@@ -60,6 +60,8 @@ public final class SelectionSpec {
     public boolean showPreview;
     public boolean singleDirectApply;
     public Locale locale;
+    public boolean onlyUseCapture;
+
     private SelectionSpec() {
     }
 
@@ -97,6 +99,7 @@ public final class SelectionSpec {
         showPreview = true;
         singleDirectApply = false;
         locale = Locale.getDefault();
+        onlyUseCapture = false;
     }
 
     public boolean singleSelectionModeEnabled() {

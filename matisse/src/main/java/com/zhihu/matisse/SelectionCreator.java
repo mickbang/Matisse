@@ -379,4 +379,9 @@ public final class SelectionCreator {
         mSelectionSpec.singleDirectApply = singleDirectApply;
         return this;
     }
+
+    public SelectionCreator onlyCapture(boolean onlyCapture){
+        mSelectionSpec.onlyUseCapture = onlyCapture;
+        return this;
+    }
 }
